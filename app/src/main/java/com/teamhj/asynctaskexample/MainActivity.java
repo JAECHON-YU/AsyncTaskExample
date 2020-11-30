@@ -2,7 +2,40 @@ package com.teamhj.asynctaskexample;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.log;
+import static java.lang.Math.pow;
+import static java.lang.Math.sin;
+import static java.lang.Math.tan;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -10,5 +43,96 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                (new ParseURL()).execute("457303100");
+                ((ProgressBar) findViewById(R.id.progress)).setVisibility(View.VISIBLE);
+            }
+        });
     }
+
+
+    public class ParseURL extends AsyncTask<String, Void, WeatherData> {
+
+        @Override
+        protected WeatherData doInBackground(String... strings) {
+
+
+            //WeatherInfo mWeatherInfo = new WeatherInfo();
+
+            WeatherData weatherData = new WeatherData();
+
+            try {
+
+
+                String urlForecast = "https://www.weather.go.kr/w/wnuri-fct/main/vshort.do?caller=default&code="
+                        +strings[0]+"&unit=km%2Fh&theme=Dark&ext=Y";
+                Log.d("TEST", urlForecast);
+                Document doc = Jsoup.connect(urlForecast).get();
+
+                Log.d("TEST", doc.text());
+
+
+                String temperature = doc.select("div.temp").get(0).text();
+                Log.d("TEST", temperature);
+
+                String humidity = doc.select("td").get(1).text();
+                Log.d("TEST", humidity);
+
+
+                String imageUrl = "http://www.weather.go.kr"
+                        +doc.select("img").get(0).attr("src").toString();
+                imageUrl = imageUrl.substring(0,61);
+                Log.d("TEST", imageUrl);
+
+
+                weatherData.temperature_now = temperature;
+                weatherData.humidity_now = humidity;
+                weatherData.imageUrl = imageUrl;
+
+
+                Elements forecastList = doc.select("div.weather-item");
+                ArrayList<String> forecastString = new ArrayList<String>();
+                for (int i=1;i<forecastList.size();i++) {
+                    String forecast_text = forecastList.select("img").get(0).attr("alt");
+                    forecastString.add(forecast_text);
+                }
+                Log.d("TEST", forecastString.toString());
+                weatherData.forecast_temp = forecastString;
+
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+
+
+            return weatherData;
+        }
+
+
+        @Override
+        protected void onPostExecute(WeatherData mWeatherInfo2) {
+            super.onPostExecute(mWeatherInfo2);
+
+            ((TextView) findViewById(R.id.textView)).setText(mWeatherInfo2.temperature_now);
+            ((TextView) findViewById(R.id.textView2)).setText(mWeatherInfo2.humidity_now);
+            ((TextView) findViewById(R.id.textView3)).setText(mWeatherInfo2.forecast_temp.toString());
+
+            ImageView imageView = findViewById(R.id.imageView);
+            Glide.with(MainActivity.this).load(mWeatherInfo2.imageUrl).into(imageView);
+            ((ProgressBar) findViewById(R.id.progress)).setVisibility(View.INVISIBLE);
+
+        }
+    }
+}
+
+class WeatherData {
+
+    String temperature_now;
+    ArrayList<String> forecast_temp;
+    String humidity_now;
+    String imageUrl;
+
 }
