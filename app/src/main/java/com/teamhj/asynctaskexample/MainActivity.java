@@ -39,11 +39,23 @@ import static java.lang.Math.tan;
 
 public class MainActivity extends AppCompatActivity {
 
+    TextView temp_Text;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        //temp_Text = findViewById(R.id.textView);
+        //temp_Text.setText("안녕하세요");
+
+        //((TextView) findViewById(R.id.textView)).setText("헬로");
+
+
+
+        //(new ParseURL()).execute("457303100");
+        //((ProgressBar) findViewById(R.id.progress)).setVisibility(View.VISIBLE);
 
         ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
                 String humidity = doc.select("td").get(1).text();
                 Log.d("TEST", humidity);
 
+                String wind = doc.select("td").get(3).text();
+                Log.d("TEST", wind);
 
                 String imageUrl = "http://www.weather.go.kr"
                         +doc.select("img").get(0).attr("src").toString();
@@ -89,15 +103,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("TEST", imageUrl);
 
 
+
+
                 weatherData.temperature_now = temperature;
                 weatherData.humidity_now = humidity;
                 weatherData.imageUrl = imageUrl;
+                weatherData.wind = wind;
 
 
                 Elements forecastList = doc.select("div.weather-item");
                 ArrayList<String> forecastString = new ArrayList<String>();
                 for (int i=1;i<forecastList.size();i++) {
-                    String forecast_text = forecastList.select("img").get(0).attr("alt");
+                    String forecast_text = forecastList.get(i).select("img").get(0).attr("alt");
                     forecastString.add(forecast_text);
                 }
                 Log.d("TEST", forecastString.toString());
@@ -119,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.textView)).setText(mWeatherInfo2.temperature_now);
             ((TextView) findViewById(R.id.textView2)).setText(mWeatherInfo2.humidity_now);
             ((TextView) findViewById(R.id.textView3)).setText(mWeatherInfo2.forecast_temp.toString());
+            ((TextView) findViewById(R.id.textView4)).setText(mWeatherInfo2.wind);
 
             ImageView imageView = findViewById(R.id.imageView);
             Glide.with(MainActivity.this).load(mWeatherInfo2.imageUrl).into(imageView);
@@ -134,5 +152,6 @@ class WeatherData {
     ArrayList<String> forecast_temp;
     String humidity_now;
     String imageUrl;
+    String wind;
 
 }
