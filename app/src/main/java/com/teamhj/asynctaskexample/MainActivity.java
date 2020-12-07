@@ -24,6 +24,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -47,15 +48,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        //temp_Text = findViewById(R.id.textView);
+        //temp_Text = findViewById(R.id.textView4);
         //temp_Text.setText("안녕하세요");
 
-        //((TextView) findViewById(R.id.textView)).setText("헬로");
+        ((TextView) findViewById(R.id.textView)).setText("헬로");
 
 
 
         //(new ParseURL()).execute("457303100");
         //((ProgressBar) findViewById(R.id.progress)).setVisibility(View.VISIBLE);
+
+        ((TextView) findViewById(R.id.textView)).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                (new ParseURL()).execute("457303100");
+                ((ProgressBar) findViewById(R.id.progress)).setVisibility(View.VISIBLE);
+
+                return false;
+            }
+        });
 
         ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("TEST", urlForecast);
                 Document doc = Jsoup.connect(urlForecast).get();
 
-                Log.d("TEST", doc.text());
+                //Log.d("TEST", doc.text());
 
 
                 String temperature = doc.select("div.temp").get(0).text();
@@ -97,18 +108,37 @@ public class MainActivity extends AppCompatActivity {
                 String wind = doc.select("td").get(3).text();
                 Log.d("TEST", wind);
 
-                String imageUrl = "http://www.weather.go.kr"
-                        +doc.select("img").get(0).attr("src").toString();
-                imageUrl = imageUrl.substring(0,61);
-                Log.d("TEST", imageUrl);
+                //String time = doc.select("span.time").get(1).text();
+                //Log.d("TEST", time);
 
+                //String imageUrl = "http://www.weather.go.kr"
+                //        +doc.select("img").get(7).attr("src").toString();
+                //imageUrl = imageUrl.substring(0,63);
+                //Log.d("TEST", imageUrl);
+
+
+                Elements arrayWeatherItem = doc.select("div.weather-item");
+
+
+                ArrayList<String> timeArray = new ArrayList<>();
+                ArrayList<String> imageUrlArray = new ArrayList<>();
+                for (int i = 1 ; i<arrayWeatherItem.size(); i++) {
+                    String time = arrayWeatherItem.get(i).select("span.time").text();
+                    Log.d("TEST",time);
+                    String imageUrl = "http://www.weather.go.kr"+arrayWeatherItem.get(i).select("img")
+                            .attr("src").substring(0,39);
+                    Log.d("TEST",imageUrl);
+                    timeArray.add(time);
+                    imageUrlArray.add(imageUrl);
+                }
 
 
 
                 weatherData.temperature_now = temperature;
                 weatherData.humidity_now = humidity;
-                weatherData.imageUrl = imageUrl;
+                weatherData.imageUrl = imageUrlArray;
                 weatherData.wind = wind;
+                weatherData.time = timeArray;
 
 
                 Elements forecastList = doc.select("div.weather-item");
@@ -135,12 +165,63 @@ public class MainActivity extends AppCompatActivity {
 
             ((TextView) findViewById(R.id.textView)).setText(mWeatherInfo2.temperature_now);
             ((TextView) findViewById(R.id.textView2)).setText(mWeatherInfo2.humidity_now);
-            ((TextView) findViewById(R.id.textView3)).setText(mWeatherInfo2.forecast_temp.toString());
+            //((TextView) findViewById(R.id.textView3)).setText(mWeatherInfo2.forecast_temp.toString());
             ((TextView) findViewById(R.id.textView4)).setText(mWeatherInfo2.wind);
+            //((TextView) findViewById(R.id.textView5)).setText(mWeatherInfo2.time);
 
-            ImageView imageView = findViewById(R.id.imageView);
-            Glide.with(MainActivity.this).load(mWeatherInfo2.imageUrl).into(imageView);
+            //ImageView imageView = findViewById(R.id.imageView);
+            //Glide.with(MainActivity.this).load(mWeatherInfo2.imageUrl).into(imageView);
+
+
+
+            LinearLayout mLinear2 = (LinearLayout) findViewById(R.id.forcast);
+
+            for (int i = 0; i < mWeatherInfo2.forecast_temp.size(); i++) {
+                LinearLayout linearLayout = new LinearLayout(getApplicationContext());
+                linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+                //사간
+                TextView timeText = new TextView(getApplicationContext());
+                timeText.setText(mWeatherInfo2.time.get(i));
+                timeText.setGravity(Gravity.CENTER);
+                linearLayout.addView(timeText);
+
+
+                //이미지
+                ImageView imageView = new ImageView(getApplicationContext());
+                Glide.with(MainActivity.this).load(mWeatherInfo2.imageUrl.get(i)).into(imageView);
+                linearLayout.addView(imageView);
+
+                // 맑음
+                TextView textViewForecast = new TextView(getApplicationContext());
+                textViewForecast.setText(mWeatherInfo2.forecast_temp.get(i));
+                textViewForecast.setGravity(Gravity.CENTER);
+                linearLayout.addView(textViewForecast);
+
+
+                mLinear2.addView(linearLayout);
+
+                // 간격
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        5,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                params.setMargins(20, 20, 20, 20);
+
+                LinearLayout distance = new LinearLayout(getApplicationContext());
+                distance.setLayoutParams(params);
+
+
+
+
+
+                mLinear2.addView(distance);
+
+            }
+
+
             ((ProgressBar) findViewById(R.id.progress)).setVisibility(View.INVISIBLE);
+
 
         }
     }
@@ -151,7 +232,8 @@ class WeatherData {
     String temperature_now;
     ArrayList<String> forecast_temp;
     String humidity_now;
-    String imageUrl;
+    ArrayList<String> imageUrl;
     String wind;
+    ArrayList<String> time;
 
 }
