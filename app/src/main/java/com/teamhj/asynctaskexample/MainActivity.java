@@ -189,7 +189,12 @@ public class MainActivity extends AppCompatActivity {
 
                 //이미지
                 ImageView imageView = new ImageView(getApplicationContext());
-                Glide.with(MainActivity.this).load(mWeatherInfo2.imageUrl.get(i)).into(imageView);
+
+                if (i%2==0) {
+                    imageView.setImageResource(R.mipmap.wi_day_hail_1);
+                } else {
+                    Glide.with(MainActivity.this).load(mWeatherInfo2.imageUrl.get(i)).into(imageView);
+                }
                 linearLayout.addView(imageView);
 
                 // 맑음
@@ -210,10 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
                 LinearLayout distance = new LinearLayout(getApplicationContext());
                 distance.setLayoutParams(params);
-
-
-
-
+                
 
                 mLinear2.addView(distance);
 
