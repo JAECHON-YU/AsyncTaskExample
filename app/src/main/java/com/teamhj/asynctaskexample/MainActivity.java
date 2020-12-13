@@ -38,6 +38,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import gun0912.ted.tedadmobdialog.OnBackPressListener;
+import gun0912.ted.tedadmobdialog.TedAdmobDialog;
+
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.log;
@@ -49,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
     TextView temp_Text;
     private AdView adView;
+
+    public static final String AD_TEST_KEY_NATIVE = "ca-app-pub-3940256099942544/2247696110";
+
+    TedAdmobDialog nativeTedAdmobDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,8 +115,42 @@ public class MainActivity extends AppCompatActivity {
         // Start loading the ad in the background.
         adView.loadAd(adRequest);
 
+
+        setNativeAds();
+
     }
 
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        nativeTedAdmobDialog.show();
+    }
+
+    private void setNativeAds() {
+        nativeTedAdmobDialog = new TedAdmobDialog.Builder(MainActivity.this, TedAdmobDialog.AdType.NATIVE, AD_TEST_KEY_NATIVE)
+                .setOnBackPressListener(new OnBackPressListener() {
+                    @Override
+                    public void onReviewClick() {
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        finish();
+                    }
+
+                    @Override
+                    public void onAdShow() {
+                        nativeTedAdmobDialog.loadNative();
+                    }
+                })
+                .create();
+
+
+
+        nativeTedAdmobDialog.loadNative();
+
+    }
 
     public class ParseURL extends AsyncTask<String, Void, WeatherData> {
 

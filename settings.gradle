@@ -1,2 +1,3 @@
+include ':tedadmobdialog'
 include ':app'
 rootProject.name = "AsyncTask Example"

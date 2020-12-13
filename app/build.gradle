@@ -42,4 +42,6 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     implementation 'com.google.android.gms:play-services-ads:19.3.0'
+
+    implementation project(':tedadmobdialog')
 }
